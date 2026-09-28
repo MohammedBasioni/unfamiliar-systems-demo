@@ -1,3 +1,5 @@
+import {calculateRefundPiasters} from "./refundPolicy.js";
+
 export type Booking = {
   id: string;
   customerId: string;
@@ -29,9 +31,7 @@ export async function cancelBooking(
   if (!booking) throw new Error("Booking not found");
   if (booking.status === "cancelled") throw new Error("Booking already cancelled");
 
-  const hoursUntilStart =
-    (new Date(booking.startAt).getTime() - now.getTime()) / (60 * 60 * 1000);
-  const refundPiasters = hoursUntilStart > 48 ? booking.pricePiasters : 0;
+  const refundPiasters = calculateRefundPiasters(booking, now);
 
   if (refundPiasters > 0) {
     await refundGateway.refund({bookingId, amountPiasters: refundPiasters});
