@@ -33,10 +33,12 @@ test("fully refunds a cancellation more than 48 hours before the booking", async
   assert.equal((await bookingStore.findById("BOOKING-42"))?.status, "cancelled");
 });
 
-test("does not refund a cancellation within 48 hours of the booking", async () => {
+test("refunds half for a cancellation from 6 to 48 hours before the booking", async () => {
   const {bookingStore, refundGateway, result} = await cancelStartingIn(24);
 
-  assert.equal(result.refundPiasters, 0);
-  assert.deepEqual(refundGateway.refunds, []);
+  assert.equal(result.refundPiasters, 6_000);
+  assert.deepEqual(refundGateway.refunds, [
+    {bookingId: "BOOKING-42", amountPiasters: 6_000},
+  ]);
   assert.equal((await bookingStore.findById("BOOKING-42"))?.status, "cancelled");
 });
