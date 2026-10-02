@@ -1,27 +1,62 @@
-# Unfamiliar booking system
+# Understanding and Modifying Unfamiliar Systems — Demo
 
-A small teaching repository for Chapter 6, “Exploring and Modifying Unfamiliar Systems.” It gives the video one real request to trace without turning the lesson into a framework tutorial.
+The companion TypeScript repository for the educational video **Understanding and Modifying Unfamiliar Systems**.
 
-## Run it
+It keeps the system deliberately small so you can practise the real workflow: find an entry point, follow one request across boundaries, capture existing behaviour, refactor safely, and then change a business rule.
+
+## Quick start
+
+Requires Node.js 22 or newer.
 
 ```bash
-npm install
+npm ci
 npm start -- --port 3000
 ```
 
-Open <http://localhost:3000>, then use the browser Network tab while cancelling `BOOKING-42`.
+Open <http://localhost:3000>, then cancel `BOOKING-42` while watching the browser Network panel.
 
-## Business rules after the ticket
+Run the checks with:
 
-- More than 48 hours before the booking: full refund.
-- From 6 to 48 hours: 50% refund.
+```bash
+npm test
+npm run typecheck
+```
+
+## Follow one request
+
+The cancellation path is intentionally short:
+
+```text
+public/index.html
+  → src/http/server.ts
+  → src/booking/cancelBooking.ts
+  → BookingStore + RefundGateway ports
+  → in-memory + recording adapters
+```
+
+## Replay the teaching checkpoints
+
+The four Git tags match the stages shown in the video:
+
+```bash
+git switch --detach step-1-unfamiliar-system
+git switch --detach step-2-characterization-tests
+git switch --detach step-3-refund-policy
+git switch --detach step-4-partial-refunds
+git switch main
+```
+
+| Tag | Purpose |
+| --- | --- |
+| `step-1-unfamiliar-system` | Runnable system with the original cancellation rule. |
+| `step-2-characterization-tests` | Tests record the observed behaviour. |
+| `step-3-refund-policy` | Refund calculation is extracted without changing behaviour. |
+| `step-4-partial-refunds` | The new rule and its boundary tests are introduced. |
+
+## Final business rule
+
+- More than 48 hours before departure: full refund.
+- From 6 through 48 hours: 50% refund.
 - Less than 6 hours: cancellation succeeds without a refund.
 
-## Follow the change
-
-The Git history preserves the teaching sequence:
-
-1. `step-1-unfamiliar-system`: runnable system with the old rule.
-2. `step-2-characterization-tests`: tests record current behavior.
-3. `step-3-refund-policy`: refund calculation is extracted without changing behavior.
-4. `step-4-partial-refunds`: the ticket and its boundary tests are implemented.
+The application stores bookings only in memory. `RecordingRefundGateway` records the requested refund for inspection; it does **not** transfer real money. The operator, route, customer, booking, price, and policy are fictional teaching data.
